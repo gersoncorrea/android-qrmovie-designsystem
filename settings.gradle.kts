@@ -20,5 +20,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "QRMovieDesignSystem"
-include(":app")
- 
+include(":design-system")
+include(":sample")

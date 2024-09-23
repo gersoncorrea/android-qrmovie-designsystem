@@ -1,6 +1,9 @@
+import org.gradle.api.publish.maven.MavenPublication
+import com.android.build.gradle.LibraryExtension
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    `maven-publish`
 }
 
 android {
@@ -18,6 +21,14 @@ android {
         }
     }
 
+    libraryVariants.all {
+        outputs.all {
+            packageLibraryProvider {
+                archiveFileName.set("qrdesignsystem-${buildType.name}.aar")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -26,7 +37,7 @@ android {
                 "proguard-rules.pro"
             )
         }
-        debug{}
+        debug {}
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -46,23 +57,49 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-}
+// Bloco de publicação
+    afterEvaluate {
+        publishing {
+            publications {
+                create<MavenPublication>("release") {
+                    groupId = "com.qrmovie"
+                    artifactId = "designsystem" // Nome personalizado da biblioteca
+                    version = "1.0.0"
 
-dependencies {
+                    // Inclui o artefato AAR (biblioteca Android)
+                    from(components["release"])
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+                    // Define o arquivo AAR gerado como o artefato para a publicação
+                    artifact("${buildDir}/outputs/aar/qrdesignsystem-release.aar") {
+                        builtBy(tasks.named("assembleRelease"))
+                    }
+                }
+            }
+
+            repositories {
+                maven {
+                    name = "myrepo"
+                    url = uri(layout.buildDirectory.dir("repo"))
+                }
+            }
+        }
+    }
+    dependencies {
+
+        implementation(libs.androidx.core.ktx)
+        implementation(libs.androidx.lifecycle.runtime.ktx)
+        implementation(libs.androidx.activity.compose)
+        implementation(platform(libs.androidx.compose.bom))
+        implementation(libs.androidx.ui)
+        implementation(libs.androidx.ui.graphics)
+        implementation(libs.androidx.ui.tooling.preview)
+        implementation(libs.androidx.material3)
+        testImplementation(libs.junit)
+        androidTestImplementation(libs.androidx.junit)
+        androidTestImplementation(libs.androidx.espresso.core)
+        androidTestImplementation(platform(libs.androidx.compose.bom))
+        androidTestImplementation(libs.androidx.ui.test.junit4)
+        debugImplementation(libs.androidx.ui.tooling)
+        debugImplementation(libs.androidx.ui.test.manifest)
+    }
 }

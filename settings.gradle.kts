@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "QRMovieDesignSystem"
 include(":design-system")
+project(":design-system").name = "qrdesign-system"
 include(":sample")

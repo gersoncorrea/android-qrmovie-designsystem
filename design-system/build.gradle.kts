@@ -1,5 +1,5 @@
 import org.gradle.api.publish.maven.MavenPublication
-import com.android.build.gradle.LibraryExtension
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -10,10 +10,11 @@ android {
     namespace = "com.qrmovie.designsystem"
     compileSdk = 34
 
+
     defaultConfig {
         minSdk = 24
         testOptions.targetSdk = 34
-        version = "1.0.0"
+        version = "v0.0.1-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -24,7 +25,7 @@ android {
     libraryVariants.all {
         outputs.all {
             packageLibraryProvider {
-                archiveFileName.set("qrdesignsystem-${buildType.name}.aar")
+                archiveFileName.set("qrdesignsystem-${version}.aar")
             }
         }
     }
@@ -46,6 +47,10 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    testFixtures {
+        enable = true
+    }
     buildFeatures {
         compose = true
     }
@@ -61,45 +66,47 @@ android {
     afterEvaluate {
         publishing {
             publications {
-                create<MavenPublication>("release") {
+                register<MavenPublication>("release") {
                     groupId = "com.qrmovie"
                     artifactId = "designsystem" // Nome personalizado da biblioteca
-                    version = "1.0.0"
+                    version = "v0.0.1-alpha"
 
                     // Inclui o artefato AAR (biblioteca Android)
-                    from(components["release"])
-
-                    // Define o arquivo AAR gerado como o artefato para a publicação
-                    artifact("${buildDir}/outputs/aar/qrdesignsystem-release.aar") {
-                        builtBy(tasks.named("assembleRelease"))
+                    afterEvaluate {
+                        from(components["release"])
                     }
                 }
             }
 
             repositories {
                 maven {
-                    name = "myrepo"
-                    url = uri(layout.buildDirectory.dir("repo"))
+                    name = "GitHubPackages"
+                    url =
+                        uri("https://maven.pkg.github.com/gersoncorrea/android-qrmovie-designsystem")
+                    credentials {
+                    username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_USERNAME")
+                    password = project.findProperty("gpr.token") as String? ?: System.getenv("GITHUB_TOKEN")
+                    }
                 }
             }
         }
     }
-    dependencies {
+            dependencies {
 
-        implementation(libs.androidx.core.ktx)
-        implementation(libs.androidx.lifecycle.runtime.ktx)
-        implementation(libs.androidx.activity.compose)
-        implementation(platform(libs.androidx.compose.bom))
-        implementation(libs.androidx.ui)
-        implementation(libs.androidx.ui.graphics)
-        implementation(libs.androidx.ui.tooling.preview)
-        implementation(libs.androidx.material3)
-        testImplementation(libs.junit)
-        androidTestImplementation(libs.androidx.junit)
-        androidTestImplementation(libs.androidx.espresso.core)
-        androidTestImplementation(platform(libs.androidx.compose.bom))
-        androidTestImplementation(libs.androidx.ui.test.junit4)
-        debugImplementation(libs.androidx.ui.tooling)
-        debugImplementation(libs.androidx.ui.test.manifest)
-    }
-}
+                implementation(libs.androidx.core.ktx)
+                implementation(libs.androidx.lifecycle.runtime.ktx)
+                implementation(libs.androidx.activity.compose)
+                implementation(platform(libs.androidx.compose.bom))
+                implementation(libs.androidx.ui)
+                implementation(libs.androidx.ui.graphics)
+                implementation(libs.androidx.ui.tooling.preview)
+                implementation(libs.androidx.material3)
+                testImplementation(libs.junit)
+                androidTestImplementation(libs.androidx.junit)
+                androidTestImplementation(libs.androidx.espresso.core)
+                androidTestImplementation(platform(libs.androidx.compose.bom))
+                androidTestImplementation(libs.androidx.ui.test.junit4)
+                debugImplementation(libs.androidx.ui.tooling)
+                debugImplementation(libs.androidx.ui.test.manifest)
+            }
+        }
